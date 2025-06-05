@@ -1,7 +1,7 @@
 
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Pattern, ChatMessage, MessageSender } from '../types'; // Added ChatMessage, MessageSender
-import { patterns as allPatternsData, ALL_PATTERNS_TEXT_FOR_EXTRACTION } from '../data/patterns';
+import { patterns as ALL_PATTERNS_TEXT_FOR_EXTRACTION } from '../data/patterns';
 import { DEFAULT_SYSTEM_INSTRUCTION } from "../constants";
 
 
