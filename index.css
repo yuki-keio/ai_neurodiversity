@@ -1,0 +1,194 @@
+/* Scrollbar styling for chat history */
+.chat-history::-webkit-scrollbar {
+  width: 8px;
+}
+.chat-history::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.chat-history::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+.chat-history::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Styles for rendered markdown content within .prose class */
+.prose {
+  /* Base text color is inherited from the chat bubble's main text color */
+  font-size: 0.875rem; /* Equivalent to text-sm */
+  line-height: 1.625; 
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  font-weight: 600; /* semibold */
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+.prose h1 { font-size: 1.5rem; }
+.prose h2 { font-size: 1.25rem; }
+.prose h3 { font-size: 1.125rem; }
+.prose h4 { font-size: 1rem; }
+.prose h5 { font-size: 0.875rem; }
+.prose h6 { font-size: 0.75rem; }
+
+.prose p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+.prose strong {
+  font-weight: 700; /* bold */
+}
+
+.prose em {
+  font-style: italic;
+}
+
+.prose ul, .prose ol {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  padding-left: 1.75em; 
+}
+.prose ul {
+  list-style-type: disc;
+}
+.prose ol {
+  list-style-type: decimal;
+}
+.prose li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+.prose li > p { /* Handle <p> inside <li> for tight spacing */
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+}
+.prose li::marker {
+  /* Ensure markers inherit color correctly within different backgrounds */
+  color: inherit; 
+}
+
+
+.prose a {
+  color: rgb(2, 132, 199); /* Tailwind sky-600 */
+  text-decoration: underline;
+}
+.prose a:hover {
+  color: rgb(3, 105, 161); /* Tailwind sky-700 */
+}
+
+
+.prose pre {
+  background-color: #1e293b; /* Tailwind slate-800 */
+  color: #f1f5f9; /* Tailwind slate-100 */
+  padding: 1rem;
+  border-radius: 0.375rem; /* rounded-md */
+  margin-top: 1em;
+  margin-bottom: 1em;
+  overflow-x: auto;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 0.875em; 
+  line-height: 1.6;
+}
+.prose code {
+  background-color: #e2e8f0; /* Tailwind slate-200 */
+  color: #1e293b; /* Tailwind slate-800, for better contrast */
+  padding: 0.125em 0.3em;
+  border-radius: 0.25rem; /* rounded-sm */
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 0.875em;
+  word-break: break-all;
+}
+.prose pre code { /* Code inside pre should not have its own background/padding */
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit; /* Inherit font size from pre */
+  word-break: inherit; /* Or normal, depending on desired behavior in code blocks */
+}
+
+.prose blockquote {
+  border-left: 4px solid #94a3b8; /* Tailwind slate-400 */
+  padding-left: 1rem;
+  font-style: italic;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  color: #475569; /* Tailwind slate-600 */
+}
+.prose hr {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 0;
+  border-top: 1px solid #cbd5e1; /* Tailwind slate-300 */
+}
+
+.prose table {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #cbd5e1; /* Tailwind slate-300 */
+  font-size: 0.875em;
+}
+.prose th, .prose td {
+  border: 1px solid #cbd5e1; /* Tailwind slate-300 */
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+.prose th {
+  background-color: #f1f5f9; /* Tailwind slate-100 */
+  font-weight: 600; /* semibold */
+}
+
+/* Ensure bot messages using .prose inherit text color correctly from Tailwind parent */
+.bg-white.text-slate-700 .prose {
+    color: #334155; /* slate-700 */
+}
+.bg-white.text-slate-700 .prose a {
+    color: rgb(2, 132, 199); /* Tailwind sky-600 */
+}
+.bg-white.text-slate-700 .prose a:hover {
+    color: rgb(3, 105, 161); /* Tailwind sky-700 */
+}
+.bg-white.text-slate-700 .prose code {
+  background-color: #e2e8f0; /* Tailwind slate-200 */
+  color: #1e293b; /* Tailwind slate-800 */
+}
+.bg-white.text-slate-700 .prose blockquote {
+  border-left-color: #94a3b8; /* Tailwind slate-400 */
+  color: #475569; /* Tailwind slate-600 */
+}
+.bg-white.text-slate-700 .prose li::marker {
+  color: #334155; /* slate-700 */
+}
+
+
+/* User messages are sky-500 with white text. Prose won't apply there, but good for reference. */
+.bg-sky-500.text-white .prose {
+  color: white;
+}
+.bg-sky-500.text-white .prose a {
+  color: #e0f2fe; /* sky-100 */
+}
+.bg-sky-500.text-white .prose a:hover {
+  color: white; 
+}
+.bg-sky-500.text-white .prose code {
+  background-color: #075985; /* sky-700 */
+  color: #e0f2fe; /* sky-100 */
+}
+.bg-sky-500.text-white .prose pre {
+  background-color: #0c4a6e; /* sky-800 */
+  color: #f0f9ff; /* sky-50 */
+}
+.bg-sky-500.text-white .prose blockquote {
+  border-left-color: #7dd3fc; /* sky-300 */
+  color: #e0f2fe; /* sky-100 */
+}
+.bg-sky-500.text-white .prose li::marker {
+  color: white;
+}

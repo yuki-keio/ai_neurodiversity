@@ -1,0 +1,6 @@
+{
+  "name": "Neurodiversity Pattern Language Chatbot",
+  "description": "A chatbot that provides advice for neurodivergent individuals based on a pattern language. It uses AI to select relevant patterns and generate personalized guidance.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
