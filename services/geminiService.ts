@@ -11,7 +11,7 @@ if (!API_KEY) {
   console.error("FATAL: API_KEY environment variable is not set. The application cannot function.");
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY! }); 
+const ai = new GoogleGenAI({ apiKey: API_KEY! });
 
 const MODEL_NAME = "gemini-2.5-flash-preview-04-17";
 
@@ -80,7 +80,7 @@ ${ALL_PATTERNS_TEXT_FOR_EXTRACTION}
       contents: prompt,
     });
 
-    const textResponse = response.text.trim();
+    const textResponse = response.text?.trim() || "";
     if (textResponse.toUpperCase() === "NONE" || textResponse === "") {
       return [];
     }
@@ -102,14 +102,14 @@ export async function* generateAdvice(userQuery: string, relevantPatterns: Patte
     // This throw will be caught by the try...catch in useChat's sendMessage
     throw new RateLimitError(MESSAGE_TEXT_RATE_LIMIT_EXCEEDED);
   }
-  
+
   if (relevantPatterns.length === 0) {
     yield MESSAGE_TEXT_NO_PATTERNS_FOUND;
     return;
   }
 
   try {
-    const patternContext = relevantPatterns.map(p => 
+    const patternContext = relevantPatterns.map(p =>
       `${p.mainText}`
     ).join('\n\n');
 
@@ -123,7 +123,7 @@ export async function* generateAdvice(userQuery: string, relevantPatterns: Patte
 関連パターン情報:
 ${patternContext}
 `;
-    
+
     const effectiveSystemInstruction = systemInstruction || DEFAULT_SYSTEM_INSTRUCTION;
 
     const responseStream = await ai.models.generateContentStream({
@@ -133,7 +133,7 @@ ${patternContext}
         systemInstruction: effectiveSystemInstruction,
       }
     });
-    
+
     let hasYielded = false;
     for await (const chunk of responseStream) {
       if (chunk.text) {
@@ -142,7 +142,7 @@ ${patternContext}
       }
     }
     if (!hasYielded) {
-        yield ""; 
+      yield "";
     }
 
   } catch (error) {
@@ -209,7 +209,7 @@ ${currentUserInput || "入力なし"}
       }
     });
 
-    let jsonStr = response.text.trim();
+    let jsonStr = response.text?.trim() || "";
     const fenceRegex = /^```(\w*)?\s*\n?(.*?)\n?\s*```$/s;
     const match = jsonStr.match(fenceRegex);
     if (match && match[2]) {

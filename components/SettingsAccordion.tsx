@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SystemInstructionOption, MessageSender } from '../types';
+import { SystemInstructionOption } from '../types';
 import { DEFAULT_SYSTEM_INSTRUCTION } from '../constants';
 
 interface SettingsAccordionProps {
