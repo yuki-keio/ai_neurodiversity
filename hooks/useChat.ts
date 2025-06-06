@@ -1,10 +1,9 @@
 
 import { useState, useCallback } from 'react';
 import { ChatMessage, MessageSender, Pattern } from '../types';
-import { 
-  getRelevantPatternNumbers, 
+import {
+  getRelevantPatternNumbers,
   generateAdvice,
-  MESSAGE_TEXT_NO_PATTERNS_FOUND,
   MESSAGE_TEXT_ERROR_GENERATING_ADVICE,
   MESSAGE_TEXT_ERROR_API_KEY_NOT_CONFIGURED,
   MESSAGE_TEXT_RATE_LIMIT_EXCEEDED, // Import new message
@@ -59,16 +58,16 @@ export const useChat = (getSystemInstruction: () => string) => {
       const relevantPatterns: Pattern[] = relevantPatternNumbers
         .map(num => allPatternsData.find(p => p.id === num))
         .filter((p): p is Pattern => p !== undefined);
-      
+
       const currentSystemInstruction = getSystemInstruction();
 
-      let adviceGenerationText = "アドバイスを作成中です...";
+      let adviceGenerationText = "";
       if (relevantPatternNumbers.length > 0 && relevantPatterns.length > 0) { // Check relevantPatterns too
         adviceGenerationText = "関連知識を元にアドバイスを作成中です...";
       } else if (relevantPatternNumbers.length === 0) { // No patterns found before advice generation
-        // This case is handled by generateAdvice yielding MESSAGE_TEXT_NO_PATTERNS_FOUND
+        adviceGenerationText = "応答を作成中です...";
       }
-      
+
       setMessages(prevMessages =>
         prevMessages.map(msg =>
           msg.id === loadingBotMessageId ? { ...msg, text: adviceGenerationText } : msg
@@ -80,32 +79,31 @@ export const useChat = (getSystemInstruction: () => string) => {
 
       for await (const chunk of generateAdvice(text, relevantPatterns, currentSystemInstruction)) {
         if (!streamHasBegun) {
-            accumulatedAdvice = chunk; 
-            streamHasBegun = true;
+          accumulatedAdvice = chunk;
+          streamHasBegun = true;
         } else {
-            accumulatedAdvice += chunk;
+          accumulatedAdvice += chunk;
         }
-        
+
         setMessages(prevMessages =>
           prevMessages.map(msg =>
             msg.id === loadingBotMessageId
               ? {
-                  ...msg,
-                  text: accumulatedAdvice, 
-                  isLoading: true, 
-                }
+                ...msg,
+                text: accumulatedAdvice,
+                isLoading: true,
+              }
               : msg
           )
         );
       }
-      
+
       if (streamHasBegun && accumulatedAdvice.trim() === "") {
-          accumulatedAdvice = MESSAGE_TEXT_ERROR_GENERATING_ADVICE; 
+        accumulatedAdvice = MESSAGE_TEXT_ERROR_GENERATING_ADVICE;
       }
 
 
-      const isErrorOrNoPatternMessage = 
-        accumulatedAdvice === MESSAGE_TEXT_NO_PATTERNS_FOUND ||
+      const isErrorOrNoPatternMessage =
         accumulatedAdvice === MESSAGE_TEXT_ERROR_GENERATING_ADVICE ||
         accumulatedAdvice === MESSAGE_TEXT_ERROR_API_KEY_NOT_CONFIGURED ||
         accumulatedAdvice === MESSAGE_TEXT_RATE_LIMIT_EXCEEDED;
@@ -114,11 +112,11 @@ export const useChat = (getSystemInstruction: () => string) => {
         prevMessages.map(msg =>
           msg.id === loadingBotMessageId
             ? {
-                ...msg,
-                text: accumulatedAdvice,
-                relevantPatterns: (relevantPatterns.length > 0 && !isErrorOrNoPatternMessage) ? relevantPatterns : undefined,
-                isLoading: false, 
-              }
+              ...msg,
+              text: accumulatedAdvice,
+              relevantPatterns: (relevantPatterns.length > 0 && !isErrorOrNoPatternMessage) ? relevantPatterns : undefined,
+              isLoading: false,
+            }
             : msg
         )
       );
@@ -129,10 +127,10 @@ export const useChat = (getSystemInstruction: () => string) => {
           prevMessages.map(msg =>
             msg.id === loadingBotMessageId
               ? {
-                  ...msg,
-                  text: (error as Error).message || MESSAGE_TEXT_RATE_LIMIT_EXCEEDED,
-                  isLoading: false,
-                }
+                ...msg,
+                text: (error as Error).message || MESSAGE_TEXT_RATE_LIMIT_EXCEEDED,
+                isLoading: false,
+              }
               : msg
           )
         );
@@ -142,10 +140,10 @@ export const useChat = (getSystemInstruction: () => string) => {
           prevMessages.map(msg =>
             msg.id === loadingBotMessageId
               ? {
-                  ...msg,
-                  text: "申し訳ありません、エラーが発生しました。もう一度試してみてください。",
-                  isLoading: false,
-                }
+                ...msg,
+                text: "申し訳ありません、エラーが発生しました。もう一度試してみてください。",
+                isLoading: false,
+              }
               : msg
           )
         );

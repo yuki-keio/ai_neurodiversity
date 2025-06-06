@@ -3,11 +3,13 @@ import { Pattern, RelatedPatternInfo } from '../types';
 
 interface PatternCardProps {
   pattern: Pattern;
+  onPatternClick?: (patternNumber: number) => void;
+  forceExpanded?: boolean;
 }
 
-const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
+const PatternCard: React.FC<PatternCardProps> = ({ pattern, onPatternClick, forceExpanded = false }) => {
   const [imageError, setImageError] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(forceExpanded);
 
   const handleImageError = () => {
     console.error(`Image failed to load: ${pattern.imageUrl}`);
@@ -15,21 +17,29 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
   };
 
   const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
+    if (!forceExpanded) {
+      setIsExpanded(!isExpanded);
+    }
   };
 
-  const DetailSection: React.FC<{ title?: string; content?: string; centeredTitle?: boolean; }> = ({ title, content, centeredTitle = false }) => {
+  const DetailSection: React.FC<{ title?: string; content?: string; centeredTitle?: boolean; bold?: boolean }> = ({ title, content, centeredTitle = false, bold = false }) => {
     return (
       <div className="mt-3">
-        {title && <h4 className={`font-semibold text-slate-700 ${centeredTitle ? 'text-center' : ''}`}>{title}</h4>}
-        <p className="text-sm text-slate-600 whitespace-pre-wrap mt-1">{content}</p>
+        {title && <h4 className={`text-slate-700 ${centeredTitle ? 'text-center' : ''}`}>{title}</h4>}
+        <p className={`text-sm text-slate-600 whitespace-pre-wrap mt-2 ${bold ? 'font-bold' : ''}`}>{content}</p>
       </div>
     );
   };
 
+  const handleRelatedPatternClick = (e: React.MouseEvent, patternNumber: number) => {
+    e.stopPropagation();
+    if (onPatternClick) {
+      onPatternClick(patternNumber);
+    }
+  };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow border border-slate-200 cursor-pointer" onClick={toggleExpand} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleExpand();}} aria-expanded={isExpanded}>
+    <div className="bg-white p-4 rounded-lg shadow border border-slate-200 cursor-pointer" onClick={toggleExpand} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleExpand(); }} aria-expanded={isExpanded}>
       <h3 className="text-lg font-semibold text-sky-700 mb-2">
         {pattern.numberText}: {pattern.name}
       </h3>
@@ -62,9 +72,9 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
       {isExpanded ? (
         <div className="space-y-2 text-sm mt-2">
           <DetailSection content={pattern.context} />
-          <DetailSection title="▼ その状況において" content={pattern.problem} centeredTitle />
+          <DetailSection title="▼ その状況において" content={pattern.problem} centeredTitle bold/>
           <DetailSection content={pattern.forces} />
-          <DetailSection title="▼ そこで" content={pattern.solution} centeredTitle />
+          <DetailSection title="▼ そこで" content={pattern.solution} centeredTitle bold/>
           <DetailSection content={pattern.actions} />
           <DetailSection title="▼その結果" content={pattern.consequences} centeredTitle />
         </div>
@@ -81,25 +91,31 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern }) => {
           <h4 className="text-sm font-semibold text-slate-700 mb-1">関連パターン:</h4>
           <ul className="list-disc list-inside space-y-1">
             {pattern.relatedPatterns.map((rp: RelatedPatternInfo) => (
-              <li key={rp.number} className="text-xs text-sky-600 hover:underline">
+              <li
+                key={rp.number}
+                className="text-xs text-sky-600 hover:underline cursor-pointer"
+                onClick={(e) => handleRelatedPatternClick(e, rp.number)}
+              >
                 No.{rp.number} {rp.text}
               </li>
             ))}
           </ul>
         </div>
       )}
-       <div className="mt-4 text-right">
-        <button
-          onClick={(e) => { e.stopPropagation(); toggleExpand(); }} // Prevent card click from firing as well
-          className="text-sm text-sky-600 hover:text-sky-700 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 rounded-md px-2 py-1"
-          aria-expanded={isExpanded}
-        >
-          {isExpanded ? '一部を隠す' : '全文を見る'}
-          <span aria-hidden="true" className="ml-1">
-            {isExpanded ? '▲' : '▼'}
-          </span>
-        </button>
-      </div>
+      {!forceExpanded && (
+        <div className="mt-4 text-right">
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleExpand(); }} // Prevent card click from firing as well
+            className="text-sm text-sky-600 hover:text-sky-700 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 rounded-md px-2 py-1"
+            aria-expanded={isExpanded}
+          >
+            {isExpanded ? '一部を隠す' : '全文を見る'}
+            <span aria-hidden="true" className="ml-1">
+              {isExpanded ? '▲' : '▼'}
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

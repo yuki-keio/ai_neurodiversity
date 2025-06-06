@@ -2,18 +2,21 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useChat } from './hooks/useChat';
 import ChatMessageItem from './components/ChatMessageItem';
-import { ChatMessage, MessageSender } from './types';
+import { ChatMessage, MessageSender, Pattern } from './types';
 import SettingsAccordion from './components/SettingsAccordion';
 import SuggestedQuestions from './components/SuggestedQuestions'; // Import new component
+import PatternModal from './components/PatternModal'; // Import PatternModal
 import { PREDEFINED_SYSTEM_INSTRUCTION_OPTIONS, DEFAULT_SYSTEM_INSTRUCTION } from './constants';
 import { generateQuestionSuggestions, RateLimitError } from './services/geminiService'; // Import new service and RateLimitError
+import { patterns } from './data/patterns'; // Import patterns data
 
 const App: React.FC = () => {
   const [systemInstruction, setSystemInstruction] = useState<string>(DEFAULT_SYSTEM_INSTRUCTION);
   const [selectedInstructionOptions, setSelectedInstructionOptions] = useState<string[]>([]);
   const [customInstructionText, setCustomInstructionText] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  
+  const [selectedPattern, setSelectedPattern] = useState<Pattern | null>(null);
+
   const getSystemInstruction = useCallback(() => systemInstruction, [systemInstruction]);
   const { messages, sendMessage, isLoading: chatIsLoading, addMessage } = useChat(getSystemInstruction);
 
@@ -33,11 +36,11 @@ const App: React.FC = () => {
     // Guard for non-empty input fetches using a ref to prevent re-entrancy
     // and to avoid making fetchSuggestions dependent on isGeneratingSuggestions state.
     if (currentInput.trim() !== "") {
-        if (isFetchingNonEmptySuggestionsRef.current) {
-            // console.log("Suggestion fetch for non-empty input skipped; another non-empty fetch is in progress.");
-            return;
-        }
-        isFetchingNonEmptySuggestionsRef.current = true;
+      if (isFetchingNonEmptySuggestionsRef.current) {
+        // console.log("Suggestion fetch for non-empty input skipped; another non-empty fetch is in progress.");
+        return;
+      }
+      isFetchingNonEmptySuggestionsRef.current = true;
     }
 
     setIsGeneratingSuggestions(true); // For global UI spinner
@@ -79,20 +82,20 @@ const App: React.FC = () => {
     if (savedText) {
       setCustomInstructionText(savedText);
     }
-  }, []); 
+  }, []);
 
   // Effect for initial automatic suggestions fetch (runs once if conditions met)
   useEffect(() => {
     if (
-        !initialSuggestionsFetchedRef.current &&
-        !chatIsLoading && // Ensure chat isn't loading for initial suggestions either
-        !showSettings &&
-        messages.length <= 1 && 
-        inputValue === "" &&
-        !hasInteracted
+      !initialSuggestionsFetchedRef.current &&
+      !chatIsLoading && // Ensure chat isn't loading for initial suggestions either
+      !showSettings &&
+      messages.length <= 1 &&
+      inputValue === "" &&
+      !hasInteracted
     ) {
-        fetchSuggestions(""); 
-        initialSuggestionsFetchedRef.current = true;
+      fetchSuggestions("");
+      initialSuggestionsFetchedRef.current = true;
     }
   }, [chatIsLoading, showSettings, messages.length, inputValue, hasInteracted, fetchSuggestions]);
 
@@ -100,8 +103,8 @@ const App: React.FC = () => {
   // Effect for fetching suggestions when messages change, settings are closed, or input is cleared
   useEffect(() => {
     if (chatIsLoading || showSettings) {
-        setSuggestedQuestions([]); 
-        return;
+      setSuggestedQuestions([]);
+      return;
     }
 
     // This effect handles fetching for EMPTY input.
@@ -110,7 +113,7 @@ const App: React.FC = () => {
       // Fetch general suggestions if initial auto-suggestions were attempted
       // AND (there are more messages than just the greeting OR user has interacted)
       if (initialSuggestionsFetchedRef.current && (messages.length > 1 || hasInteracted)) {
-        fetchSuggestions(""); 
+        fetchSuggestions("");
       }
     }
   }, [messages, showSettings, chatIsLoading, fetchSuggestions, hasInteracted, inputValue]);
@@ -156,21 +159,21 @@ const App: React.FC = () => {
     localStorage.setItem('customSystemInstruction', newInstruction);
     localStorage.setItem('selectedInstructionOptions', JSON.stringify(newSelectedOptions));
     localStorage.setItem('customInstructionText', newText);
-    
-    setShowSettings(false); 
+
+    setShowSettings(false);
 
     let systemMessageText = "AIの設定を更新しました。";
     if (newInstruction !== DEFAULT_SYSTEM_INSTRUCTION) {
-        const diffText = newInstruction.replace(DEFAULT_SYSTEM_INSTRUCTION, '').trim();
-        if (diffText) {
-             systemMessageText += `\n新しい指示の要約: 「${diffText.substring(0, 100)}${diffText.length > 100 ? '...' : ''}」`;
-        }
+      const diffText = newInstruction.replace(DEFAULT_SYSTEM_INSTRUCTION, '').trim();
+      if (diffText) {
+        systemMessageText += `\n新しい指示の要約: 「${diffText.substring(0, 100)}${diffText.length > 100 ? '...' : ''}」`;
+      }
     }
     addMessage({
-        id: `system-${Date.now()}`,
-        sender: MessageSender.SYSTEM,
-        text: systemMessageText,
-        timestamp: new Date(),
+      id: `system-${Date.now()}`,
+      sender: MessageSender.SYSTEM,
+      text: systemMessageText,
+      timestamp: new Date(),
     });
   };
 
@@ -180,7 +183,7 @@ const App: React.FC = () => {
       // hasInteracted would have been set by onChange if it wasn't already
       sendMessage(inputValue);
       setInputValue('');
-      setSuggestedQuestions([]); 
+      setSuggestedQuestions([]);
     }
   };
 
@@ -199,13 +202,24 @@ const App: React.FC = () => {
     }
   };
 
+  const handlePatternClick = (patternNumber: number) => {
+    const pattern = patterns.find(p => p.id === patternNumber);
+    if (pattern) {
+      setSelectedPattern(pattern);
+    }
+  };
+
+  const handleClosePatternModal = () => {
+    setSelectedPattern(null);
+  };
+
 
   const SendIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
       <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
     </svg>
   );
-  
+
   const SettingsIcon = () => (
     <img src="./images/setting.png" alt="Settings" className="w-6 h-6" />
   );
@@ -217,8 +231,8 @@ const App: React.FC = () => {
           <h1 className="text-xl font-semibold">発達当事者サポートAI</h1>
           <p className="text-xs text-sky-100">あなたの状況や特性に合わせた経験則を見つけ、AIがアドバイスします</p>
         </div>
-        <button 
-          onClick={() => setShowSettings(!showSettings)} 
+        <button
+          onClick={() => setShowSettings(!showSettings)}
           className="p-2 rounded-full hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75"
           aria-label="AI設定を開く"
           aria-expanded={showSettings}
@@ -228,17 +242,17 @@ const App: React.FC = () => {
       </header>
 
       {showSettings && (
-         <SettingsAccordion
-            initialSelectedOptions={selectedInstructionOptions}
-            initialCustomText={customInstructionText}
-            onSave={handleSaveSettings}
-            predefinedOptions={PREDEFINED_SYSTEM_INSTRUCTION_OPTIONS}
+        <SettingsAccordion
+          initialSelectedOptions={selectedInstructionOptions}
+          initialCustomText={customInstructionText}
+          onSave={handleSaveSettings}
+          predefinedOptions={PREDEFINED_SYSTEM_INSTRUCTION_OPTIONS}
         />
       )}
 
       <div ref={chatHistoryRef} className="flex-grow p-6 space-y-6 overflow-y-auto chat-history bg-slate-100">
         {messages.map((msg: ChatMessage) => (
-          <ChatMessageItem key={msg.id} message={msg} />
+          <ChatMessageItem key={msg.id} message={msg} onPatternClick={handlePatternClick} />
         ))}
       </div>
 
@@ -248,8 +262,8 @@ const App: React.FC = () => {
             suggestions={suggestedQuestions}
             isLoading={isGeneratingSuggestions}
             onSuggestionClick={handleSuggestionClick}
-            onRefreshClick={() => fetchSuggestions(inputValue)} 
-            hasInteracted={hasInteracted} 
+            onRefreshClick={() => fetchSuggestions(inputValue)}
+            hasInteracted={hasInteracted}
           />
         )}
         <form onSubmit={handleSubmit} className={`flex items-center space-x-3 ${!showSettings ? 'mt-3' : ''}`}>
@@ -276,7 +290,7 @@ const App: React.FC = () => {
             {chatIsLoading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" role="status" aria-label="読み込み中"></div>
             ) : (
-              <SendIcon/>
+              <SendIcon />
             )}
           </button>
         </form>
@@ -284,9 +298,15 @@ const App: React.FC = () => {
           AIによるアドバイスは参考情報です。専門的な助言が必要な場合は医師やカウンセラーにご相談ください。
         </p>
       </footer>
+
+      <PatternModal
+        pattern={selectedPattern}
+        isOpen={selectedPattern !== null}
+        onClose={handleClosePatternModal}
+        onPatternClick={handlePatternClick}
+      />
     </div>
   );
 };
 
 export default App;
-    

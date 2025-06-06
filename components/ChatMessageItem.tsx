@@ -6,7 +6,6 @@ import { ChatMessage, MessageSender, Pattern } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 import PatternCard from './PatternCard';
 import {
-  MESSAGE_TEXT_NO_PATTERNS_FOUND,
   MESSAGE_TEXT_ERROR_GENERATING_ADVICE,
   MESSAGE_TEXT_ERROR_API_KEY_NOT_CONFIGURED
 } from '../services/geminiService';
@@ -21,9 +20,10 @@ marked.setOptions({
 
 interface ChatMessageItemProps {
   message: ChatMessage;
+  onPatternClick?: (patternNumber: number) => void;
 }
 
-const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
+const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onPatternClick }) => {
   const isUser = message.sender === MessageSender.USER;
   const isBot = message.sender === MessageSender.BOT;
   const isSystem = message.sender === MessageSender.SYSTEM;
@@ -63,7 +63,6 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
 
   const isSpecialBotMessage = isBot && (
     message.isLoading ||
-    message.text === MESSAGE_TEXT_NO_PATTERNS_FOUND ||
     message.text === MESSAGE_TEXT_ERROR_GENERATING_ADVICE ||
     message.text === MESSAGE_TEXT_ERROR_API_KEY_NOT_CONFIGURED
   );
@@ -71,7 +70,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
   return (
     <div className={`flex items-end mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex items-start max-w-xl lg:max-w-2xl ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-        <div className={`flex-shrink-0 ${isUser ? 'w-8 h-8': 'w-14 h-14'} rounded-full flex items-center justify-center ${isUser ? 'bg-sky-500 ml-3' : 'mr-3'}`}>
+        <div className={`flex-shrink-0 ${isUser ? 'w-8 h-8' : 'w-14 h-14'} rounded-full flex items-center justify-center ${isUser ? 'bg-sky-500 ml-3' : 'mr-3'}`}>
           {isUser ? <UserIcon /> : <BotIcon />}
         </div>
         <div className={`p-4 rounded-xl shadow-md ${isUser ? 'bg-sky-500 text-white rounded-br-none' : 'bg-white text-slate-700 rounded-bl-none border border-slate-200'}`}>
@@ -80,7 +79,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
           ) : (
             <p className="text-sm whitespace-pre-wrap">{message.text}</p>
           )}
-          
+
           {isBot && message.isLoading && (
             <div className="mt-2 flex justify-start pt-1">
               <LoadingSpinner />
@@ -91,7 +90,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message }) => {
             <div className="mt-4 space-y-3">
               <h4 className="text-xs font-semibold text-indigo-600">関連する可能性のあるパターン:</h4>
               {message.relevantPatterns.map((pattern: Pattern) => (
-                <PatternCard key={pattern.id} pattern={pattern} />
+                <PatternCard key={pattern.id} pattern={pattern} onPatternClick={onPatternClick} />
               ))}
             </div>
           )}

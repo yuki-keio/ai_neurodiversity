@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Pattern, ChatMessage, MessageSender } from '../types'; // Added ChatMessage, MessageSender
 import { patterns as ALL_PATTERNS_TEXT_FOR_EXTRACTION } from '../data/patterns';
@@ -45,7 +44,7 @@ function canMakeApiCall(callType: string): boolean {
 }
 
 
-export const MESSAGE_TEXT_NO_PATTERNS_FOUND = "関連性の高いパターンが見つかりませんでした。もう少し詳しく教えていただけますか？";
+// export const MESSAGE_TEXT_NO_PATTERNS_FOUND = "関連性の高い経験則が見つかりませんでした。もう少し詳しく教えていただけますか？";
 export const MESSAGE_TEXT_ERROR_GENERATING_ADVICE = "申し訳ありません。アドバイスの生成中にエラーが発生しました。";
 export const MESSAGE_TEXT_ERROR_API_KEY_NOT_CONFIGURED = "申し訳ありませんが、現在アドバイスを生成できません。";
 export const MESSAGE_TEXT_RATE_LIMIT_EXCEEDED = "AIの応答生成が混み合っています。しばらくしてからもう一度お試しください。";
@@ -103,17 +102,24 @@ export async function* generateAdvice(userQuery: string, relevantPatterns: Patte
     throw new RateLimitError(MESSAGE_TEXT_RATE_LIMIT_EXCEEDED);
   }
 
-  if (relevantPatterns.length === 0) {
-    yield MESSAGE_TEXT_NO_PATTERNS_FOUND;
-    return;
-  }
-
   try {
-    const patternContext = relevantPatterns.map(p =>
-      `${p.mainText}`
-    ).join('\n\n');
+    let prompt: string;
 
-    const prompt = `
+    if (relevantPatterns.length === 0) {
+      // パターンが見つからない場合の短い応答用プロンプト
+      prompt = `
+あなたはニューロダイバージェントのためにコーチングを行うプロフェッショナルです。
+下記のユーザーの質問に対して、実践的で役立つアドバイスを300字以内で答えてください。
+
+ユーザーの質問: "${userQuery}"
+`;
+    } else {
+      // パターンが見つかった場合の通常プロンプト
+      const patternContext = relevantPatterns.map(p =>
+        `${p.mainText}`
+      ).join('\n\n');
+
+      prompt = `
 あなたはニューロダイバージェントのためにコーチングを行うプロフェッショナルです。
 下記のユーザーの質問と関連パターン情報を踏まえて、指示に従いアドバイスを作成してください。ただし、関連パターン情報自体はあなたの回答と別に表示されるので、単なる繰り返しは避けて。
 
@@ -123,6 +129,7 @@ export async function* generateAdvice(userQuery: string, relevantPatterns: Patte
 関連パターン情報:
 ${patternContext}
 `;
+    }
 
     const effectiveSystemInstruction = systemInstruction || DEFAULT_SYSTEM_INSTRUCTION;
 
