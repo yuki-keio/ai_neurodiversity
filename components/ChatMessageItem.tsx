@@ -70,7 +70,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onPatternCli
   return (
     <div className={`flex items-end mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex items-start max-w-xl lg:max-w-2xl ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-        <div className={`flex-shrink-0 ${isUser ? 'w-8 h-8' : 'w-14 h-14'} rounded-full flex items-center justify-center ${isUser ? 'bg-sky-500 ml-3' : 'mr-3'}`}>
+        <div className={`flex-shrink-0 ${isUser ? 'w-8 h-8' : 'w-14 h-14'} rounded-full flex items-center justify-center ${isUser ? 'bg-sky-500 ml-3' : 'mr-1'}`}>
           {isUser ? <UserIcon /> : <BotIcon />}
         </div>
         <div className={`p-4 rounded-xl shadow-md ${isUser ? 'bg-sky-500 text-white rounded-br-none' : 'bg-white text-slate-700 rounded-bl-none border border-slate-200'}`}>

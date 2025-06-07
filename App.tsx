@@ -10,12 +10,29 @@ import { PREDEFINED_SYSTEM_INSTRUCTION_OPTIONS, DEFAULT_SYSTEM_INSTRUCTION } fro
 import { generateQuestionSuggestions, RateLimitError } from './services/geminiService'; // Import new service and RateLimitError
 import { patterns } from './data/patterns'; // Import patterns data
 
+// Service Worker登録
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('Service Worker registered successfully:', registration.scope);
+      })
+      .catch((error) => {
+        console.log('Service Worker registration failed:', error);
+      });
+  });
+}
+
 const App: React.FC = () => {
   const [systemInstruction, setSystemInstruction] = useState<string>(DEFAULT_SYSTEM_INSTRUCTION);
   const [selectedInstructionOptions, setSelectedInstructionOptions] = useState<string[]>([]);
   const [customInstructionText, setCustomInstructionText] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [selectedPattern, setSelectedPattern] = useState<Pattern | null>(null);
+
+  // PWAインストール関連の状態
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState<boolean>(false);
 
   const getSystemInstruction = useCallback(() => systemInstruction, [systemInstruction]);
   const { messages, sendMessage, isLoading: chatIsLoading, addMessage } = useChat(getSystemInstruction);
@@ -83,6 +100,84 @@ const App: React.FC = () => {
       setCustomInstructionText(savedText);
     }
   }, []);
+
+  // PWAインストールプロンプトの設定
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      console.log('beforeinstallprompt event fired', e);
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    };
+
+    // PWAの要件をチェック
+    const checkPWARequirements = async () => {
+      const requirements = {
+        serviceWorker: 'serviceWorker' in navigator,
+        manifest: document.querySelector('link[rel="manifest"]') !== null,
+        https: location.protocol === 'https:' || location.hostname === 'localhost',
+      };
+
+      console.log('PWA Requirements Check:', requirements);
+
+      // Service Workerの登録状況を確認
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          console.log('Service Worker Registration:', registration);
+
+          if (registration) {
+            console.log('SW State:', registration.active?.state);
+            console.log('SW Scope:', registration.scope);
+          }
+        } catch (error) {
+          console.error('Service Worker check error:', error);
+        }
+      }
+
+      // マニフェストの内容を確認
+      try {
+        const manifestResponse = await fetch('/manifest.json');
+        const manifest = await manifestResponse.json();
+        console.log('Manifest loaded:', manifest);
+      } catch (error) {
+        console.error('Manifest fetch error:', error);
+      }
+
+      // 既にインストール済みかチェック
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('App is already installed');
+      } else {
+        console.log('App is not installed');
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // 少し遅らせてチェックを実行（DOMが完全に読み込まれた後）
+    setTimeout(checkPWARequirements, 1000);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // PWAインストールハンドラー
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult: any) => {
+        console.log('Install prompt result:', choiceResult);
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the PWA install prompt');
+        } else {
+          console.log('User dismissed the PWA install prompt');
+        }
+        setDeferredPrompt(null);
+        setShowInstallPrompt(false);
+      });
+    }
+  };
 
   // Effect for initial automatic suggestions fetch (runs once if conditions met)
   useEffect(() => {
@@ -231,14 +326,28 @@ const App: React.FC = () => {
           <h1 className="text-xl font-semibold">発達当事者サポートAI</h1>
           <p className="text-xs text-sky-100">あなたの状況や特性に合わせた経験則を見つけ、AIがアドバイスします</p>
         </div>
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          className="p-2 rounded-full hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75"
-          aria-label="AI設定を開く"
-          aria-expanded={showSettings}
-        >
-          <SettingsIcon />
-        </button>
+        <div className="flex items-center space-x-2">
+          {showInstallPrompt && (
+            <button
+              onClick={handleInstallClick}
+              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200 flex items-center space-x-1"
+              title="アプリをインストール"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                <path fillRule="evenodd" d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+              </svg>
+              <span>インストール</span>
+            </button>
+          )}
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 rounded-full hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75"
+            aria-label="AI設定を開く"
+            aria-expanded={showSettings}
+          >
+            <SettingsIcon />
+          </button>
+        </div>
       </header>
 
       {showSettings && (

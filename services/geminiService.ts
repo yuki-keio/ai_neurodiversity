@@ -47,7 +47,7 @@ function canMakeApiCall(callType: string): boolean {
 // export const MESSAGE_TEXT_NO_PATTERNS_FOUND = "関連性の高い経験則が見つかりませんでした。もう少し詳しく教えていただけますか？";
 export const MESSAGE_TEXT_ERROR_GENERATING_ADVICE = "申し訳ありません。アドバイスの生成中にエラーが発生しました。";
 export const MESSAGE_TEXT_ERROR_API_KEY_NOT_CONFIGURED = "申し訳ありませんが、現在アドバイスを生成できません。";
-export const MESSAGE_TEXT_RATE_LIMIT_EXCEEDED = "AIの応答生成が混み合っています。しばらくしてからもう一度お試しください。";
+export const MESSAGE_TEXT_RATE_LIMIT_EXCEEDED = "直近24時間でのAIアドバイス生成数が上限に達しました。しばらく時間を置いてから再度お試しください。";
 
 
 export const getRelevantPatternNumbers = async (userQuery: string): Promise<number[]> => {

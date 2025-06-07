@@ -1,0 +1,33 @@
+{
+  "name": "発達サポートAI",
+  "short_name": "発達AI",
+  "description": "自閉・ADHD・学習障害などニューロダイバージェントの当事者の経験則を学習したAIアドバイザー",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "images/niuniu.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "images/niuniu512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/no4sample.png",
+      "sizes": "1286x998",
+      "type": "image/png"
+    }
+  ]
+}
