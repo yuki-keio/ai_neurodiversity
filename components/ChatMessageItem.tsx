@@ -21,9 +21,10 @@ marked.setOptions({
 interface ChatMessageItemProps {
   message: ChatMessage;
   onPatternClick?: (patternNumber: number) => void;
+  onOpenModal?: (pattern: Pattern) => void;
 }
 
-const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onPatternClick }) => {
+const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onPatternClick, onOpenModal }) => {
   const isUser = message.sender === MessageSender.USER;
   const isBot = message.sender === MessageSender.BOT;
   const isSystem = message.sender === MessageSender.SYSTEM;
@@ -87,11 +88,17 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onPatternCli
           )}
 
           {isBot && !message.isLoading && message.relevantPatterns && message.relevantPatterns.length > 0 && (
-            <div className="mt-4 space-y-3">
-              <h4 className="text-xs font-semibold text-indigo-600">関連する可能性のあるパターン:</h4>
-              {message.relevantPatterns.map((pattern: Pattern) => (
-                <PatternCard key={pattern.id} pattern={pattern} onPatternClick={onPatternClick} />
-              ))}
+            <div className="mt-4">
+              <h4 className="text-xs font-semibold text-indigo-600 mb-3">関連する可能性のあるパターン:</h4>
+              <div className="overflow-x-auto max-w-xl  w-[66vw]">
+                <div className="flex gap-2 pb-2">
+                  {message.relevantPatterns.map((pattern: Pattern) => (
+                    <div key={pattern.id} className="flex-shrink-0">
+                      <PatternCard pattern={pattern} onPatternClick={onPatternClick} onOpenModal={onOpenModal} />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

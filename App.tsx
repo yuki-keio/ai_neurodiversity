@@ -304,6 +304,10 @@ const App: React.FC = () => {
     }
   };
 
+  const handleOpenModal = (pattern: Pattern) => {
+    setSelectedPattern(pattern);
+  };
+
   const handleClosePatternModal = () => {
     setSelectedPattern(null);
   };
@@ -359,9 +363,9 @@ const App: React.FC = () => {
         />
       )}
 
-      <div ref={chatHistoryRef} className="flex-grow p-6 space-y-6 overflow-y-auto chat-history bg-slate-100">
+      <div ref={chatHistoryRef} className="flex-grow p-4 space-y-6 overflow-y-auto chat-history bg-slate-100">
         {messages.map((msg: ChatMessage) => (
-          <ChatMessageItem key={msg.id} message={msg} onPatternClick={handlePatternClick} />
+          <ChatMessageItem key={msg.id} message={msg} onPatternClick={handlePatternClick} onOpenModal={handleOpenModal} />
         ))}
       </div>
 

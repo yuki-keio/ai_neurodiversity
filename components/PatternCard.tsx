@@ -4,21 +4,24 @@ import { Pattern, RelatedPatternInfo } from '../types';
 interface PatternCardProps {
   pattern: Pattern;
   onPatternClick?: (patternNumber: number) => void;
+  onOpenModal?: (pattern: Pattern) => void;
   forceExpanded?: boolean;
 }
 
-const PatternCard: React.FC<PatternCardProps> = ({ pattern, onPatternClick, forceExpanded = false }) => {
+const PatternCard: React.FC<PatternCardProps> = ({ pattern, onPatternClick, onOpenModal, forceExpanded = false }) => {
   const [imageError, setImageError] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(forceExpanded);
+  // Modal表示時は常に展開状態として扱う
+  const isExpanded = forceExpanded;
 
   const handleImageError = () => {
     console.error(`Image failed to load: ${pattern.imageUrl}`);
     setImageError(true);
   };
 
-  const toggleExpand = () => {
-    if (!forceExpanded) {
-      setIsExpanded(!isExpanded);
+  const handleOpenModal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onOpenModal) {
+      onOpenModal(pattern);
     }
   };
 
@@ -39,16 +42,21 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern, onPatternClick, forc
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow border border-slate-200 cursor-pointer" onClick={toggleExpand} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleExpand(); }} aria-expanded={isExpanded}>
-      <h3 className="text-lg font-semibold text-sky-700 mb-2">
+    <div className={`bg-white p-4 rounded-lg shadow border border-slate-200 ${forceExpanded ? '' : 'cursor-pointer w-[215px] md:w-[400px]'}`} onClick={forceExpanded ? undefined : handleOpenModal} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') !forceExpanded && handleOpenModal(e as any); }} aria-expanded={isExpanded}>
+      <h3 className={`${isExpanded ? 'text-lg' : 'text-base'} font-semibold text-sky-700 mb-2`}>
         {pattern.numberText}: {pattern.name}
       </h3>
-      <p className="text-xs text-slate-500 mb-2">
-        {pattern.category} &gt; {pattern.group}
-      </p>
-      <div className="text-sm">
-        {isExpanded && (<DetailSection content={pattern.introduction} />)}
-      </div>
+      {isExpanded && (
+        <p className="text-xs text-slate-500 mb-2">
+          {pattern.category} &gt; {pattern.group}
+        </p>
+      )}
+      {isExpanded && (
+        <div className="text-sm">
+          <DetailSection content={pattern.introduction} />
+        </div>
+      )}
+
       {imageError ? (
         <div className="w-full h-40 bg-slate-200 flex items-center justify-center rounded mb-3">
           <span className="text-slate-500 text-sm">画像準備中</span>
@@ -62,7 +70,7 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern, onPatternClick, forc
         />
       )}
 
-      {pattern.exampleQuote && (
+      {pattern.exampleQuote &&  (window.innerWidth > 768 || isExpanded) && (
         <div className="mb-3 p-3 bg-sky-50 rounded border-l-4 border-sky-500">
           <p className="text-sm text-slate-700 italic">"{pattern.exampleQuote.quote}"</p>
           <p className="text-xs text-slate-500 mt-1 text-right">- {pattern.exampleQuote.person}</p>
@@ -72,19 +80,22 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern, onPatternClick, forc
       {isExpanded ? (
         <div className="space-y-2 text-sm mt-2">
           <DetailSection content={pattern.context} />
-          <DetailSection title="▼ その状況において" content={pattern.problem} centeredTitle bold/>
+          <DetailSection title="▼ その状況において" content={pattern.problem} centeredTitle bold />
           <DetailSection content={pattern.forces} />
-          <DetailSection title="▼ そこで" content={pattern.solution} centeredTitle bold/>
+          <DetailSection title="▼ そこで" content={pattern.solution} centeredTitle bold />
           <DetailSection content={pattern.actions} />
           <DetailSection title="▼その結果" content={pattern.consequences} centeredTitle />
         </div>
-      ) : (
+      ) : (window.innerWidth > 768) ? (
         <div className="space-y-2 text-sm mt-2">
           <DetailSection content={pattern.context} />
           <DetailSection title="▼ その状況において" content={pattern.problem} centeredTitle />
           <DetailSection title="▼ そこで" content={pattern.solution} centeredTitle />
         </div>
-      )}
+      ) : (<div className="space-y-2 text-sm mt-2">
+        <DetailSection content={pattern.solution} centeredTitle />
+      </div>
+    )}
 
       {pattern.relatedPatterns && pattern.relatedPatterns.length > 0 && isExpanded && (
         <div className="mt-4">
@@ -105,13 +116,12 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern, onPatternClick, forc
       {!forceExpanded && (
         <div className="mt-4 text-right">
           <button
-            onClick={(e) => { e.stopPropagation(); toggleExpand(); }} // Prevent card click from firing as well
+            onClick={handleOpenModal}
             className="text-sm text-sky-600 hover:text-sky-700 font-medium focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 rounded-md px-2 py-1"
-            aria-expanded={isExpanded}
           >
-            {isExpanded ? '一部を隠す' : '全文を見る'}
+            全文を見る
             <span aria-hidden="true" className="ml-1">
-              {isExpanded ? '▲' : '▼'}
+              ▼
             </span>
           </button>
         </div>
