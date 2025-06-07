@@ -43,18 +43,22 @@ const App: React.FC = () => {
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState<boolean>(false);
   const [hasInteracted, setHasInteracted] = useState<boolean>(false);
+  const [showSuggestedQuestions, setShowSuggestedQuestions] = useState<boolean>(true);
   const suggestionDebounceTimeoutRef = useRef<number | null>(null);
   const initialSuggestionsFetchedRef = useRef(false); // Ref to track initial fetch
   const isFetchingNonEmptySuggestionsRef = useRef(false); // Ref to manage "busy" state for non-empty input suggestion fetches
 
   const fetchSuggestions = useCallback(async (currentInput: string) => {
-    if (chatIsLoading && currentInput.trim() !== "") return;
+    if (!showSuggestedQuestions) {
+      console.log("Suggestion fetch skipped; showSuggestedQuestions is false.");
+      return;
+    }
 
     // Guard for non-empty input fetches using a ref to prevent re-entrancy
     // and to avoid making fetchSuggestions dependent on isGeneratingSuggestions state.
     if (currentInput.trim() !== "") {
       if (isFetchingNonEmptySuggestionsRef.current) {
-        // console.log("Suggestion fetch for non-empty input skipped; another non-empty fetch is in progress.");
+        console.log("Suggestion fetch for non-empty input skipped; another non-empty fetch is in progress.");
         return;
       }
       isFetchingNonEmptySuggestionsRef.current = true;
@@ -82,9 +86,8 @@ const App: React.FC = () => {
         isFetchingNonEmptySuggestionsRef.current = false;
       }
     }
-  }, [messages, getSystemInstruction, chatIsLoading /* REMOVED isGeneratingSuggestions */]);
+  }, [messages, getSystemInstruction, showSuggestedQuestions]);
 
-  // Effect for loading settings from localStorage (runs once on mount)
   useEffect(() => {
     const savedInstruction = localStorage.getItem('customSystemInstruction');
     const savedOptions = localStorage.getItem('selectedInstructionOptions');
@@ -181,50 +184,28 @@ const App: React.FC = () => {
 
   // Effect for initial automatic suggestions fetch (runs once if conditions met)
   useEffect(() => {
+    console.log("Checking for initial suggestions fetch...");
     if (
       !initialSuggestionsFetchedRef.current &&
       !chatIsLoading && // Ensure chat isn't loading for initial suggestions either
-      !showSettings &&
-      messages.length <= 1 &&
-      inputValue === "" &&
-      !hasInteracted
+      !showSettings
     ) {
       fetchSuggestions("");
       initialSuggestionsFetchedRef.current = true;
     }
-  }, [chatIsLoading, showSettings, messages.length, inputValue, hasInteracted, fetchSuggestions]);
-
-
-  // Effect for fetching suggestions when messages change, settings are closed, or input is cleared
-  useEffect(() => {
-    if (chatIsLoading || showSettings) {
-      setSuggestedQuestions([]);
-      return;
-    }
-
-    // This effect handles fetching for EMPTY input.
-    // If inputValue is non-empty, the debounced effect below handles it.
-    if (inputValue.trim() === "") {
-      // Fetch general suggestions if initial auto-suggestions were attempted
-      // AND (there are more messages than just the greeting OR user has interacted)
-      if (initialSuggestionsFetchedRef.current && (messages.length > 1 || hasInteracted)) {
-        fetchSuggestions("");
-      }
-    }
-  }, [messages, showSettings, chatIsLoading, fetchSuggestions, hasInteracted, inputValue]);
-
+  }, [chatIsLoading, showSettings]);
 
   // Debounced fetch for suggestions based on non-empty user input
   useEffect(() => {
+    console.log("Setting up suggestion debounce effect...");
     if (suggestionDebounceTimeoutRef.current) {
       clearTimeout(suggestionDebounceTimeoutRef.current);
       suggestionDebounceTimeoutRef.current = null;
     }
 
-    // Do not proceed if settings are open, chat is loading, or input is empty
-    if (showSettings || chatIsLoading || inputValue.trim().length === 0) {
-      // If input became empty, the MC effect above handles fetching suggestions for empty input.
-      // We ensure any pending timeout for non-empty input is cleared.
+    // AIからの応答中、設定画面が開いているとき、または入力が空のときは処理しない
+    if (!showSuggestedQuestions) {
+      console.log("Suggestion fetch skipped; showSuggestedQuestions is false.");
       return;
     }
 
@@ -232,10 +213,10 @@ const App: React.FC = () => {
     const currentInputVal = inputValue; // Capture inputValue for the timeout
     suggestionDebounceTimeoutRef.current = window.setTimeout(() => {
       // Re-check critical conditions at execution time
-      if (!showSettings && !chatIsLoading) {
+      if (showSuggestedQuestions) {
         fetchSuggestions(currentInputVal);
       }
-    }, 1200);
+    }, 1000);
 
     return () => { // Cleanup function
       if (suggestionDebounceTimeoutRef.current) {
@@ -243,7 +224,7 @@ const App: React.FC = () => {
         suggestionDebounceTimeoutRef.current = null;
       }
     };
-  }, [inputValue, showSettings, chatIsLoading, fetchSuggestions]);
+  }, [inputValue, showSettings]);
 
 
   const handleSaveSettings = (newInstruction: string, newSelectedOptions: string[], newText: string) => {
@@ -256,6 +237,7 @@ const App: React.FC = () => {
     localStorage.setItem('customInstructionText', newText);
 
     setShowSettings(false);
+    setShowSuggestedQuestions(true); // Re-show suggestions after saving settings
 
     let systemMessageText = "AIの設定を更新しました。";
     if (newInstruction !== DEFAULT_SYSTEM_INSTRUCTION) {
@@ -279,6 +261,7 @@ const App: React.FC = () => {
       sendMessage(inputValue);
       setInputValue('');
       setSuggestedQuestions([]);
+      setShowSuggestedQuestions(false);
     }
   };
 
@@ -295,6 +278,14 @@ const App: React.FC = () => {
     if (inputElement) {
       inputElement.focus();
     }
+  };
+
+  const handleCloseSuggestedQuestions = () => {
+    setShowSuggestedQuestions(false);
+  };
+
+  const handleInputFocus = () => {
+    setShowSuggestedQuestions(true);
   };
 
   const handlePatternClick = (patternNumber: number) => {
@@ -320,7 +311,7 @@ const App: React.FC = () => {
   );
 
   const SettingsIcon = () => (
-    <img src="./images/setting.png" alt="Settings" className="w-6 h-6" />
+    <img src="./images/setting.png" alt="Settings" className="w-6 h-6" loading='lazy'/>
   );
 
   return (
@@ -370,16 +361,17 @@ const App: React.FC = () => {
       </div>
 
       <footer className="bg-white p-4 border-t border-slate-200">
-        {!showSettings && (
+        {showSuggestedQuestions && (
           <SuggestedQuestions
             suggestions={suggestedQuestions}
             isLoading={isGeneratingSuggestions}
             onSuggestionClick={handleSuggestionClick}
             onRefreshClick={() => fetchSuggestions(inputValue)}
+            onCloseClick={handleCloseSuggestedQuestions}
             hasInteracted={hasInteracted}
           />
         )}
-        <form onSubmit={handleSubmit} className={`flex items-center space-x-3 ${!showSettings ? 'mt-3' : ''}`}>
+        <form onSubmit={handleSubmit} className={`flex items-center space-x-3 ${showSuggestedQuestions ? 'mt-3' : ''}`}>
           <input
             type="text"
             value={inputValue}
@@ -390,6 +382,7 @@ const App: React.FC = () => {
                 setHasInteracted(true);
               }
             }}
+            onFocus={handleInputFocus}
             placeholder="悩みごとや知りたいことなどを入力してください..."
             className="flex-grow p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-shadow duration-150"
             aria-label="チャットメッセージ入力"

@@ -42,7 +42,7 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern, onPatternClick, onOp
   };
 
   return (
-    <div className={`bg-white p-4 rounded-lg shadow border border-slate-200 ${forceExpanded ? '' : 'cursor-pointer w-[215px] md:w-[400px]'}`} onClick={forceExpanded ? undefined : handleOpenModal} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') !forceExpanded && handleOpenModal(e as any); }} aria-expanded={isExpanded}>
+    <div className={`bg-white p-4 rounded-lg shadow border border-slate-200 ${forceExpanded ? '' : 'cursor-pointer w-[215px] md:w-[400px]'}`} onClick={forceExpanded ? undefined : handleOpenModal} role={forceExpanded ? '' : 'button'} tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') !forceExpanded && handleOpenModal(e as any); }} aria-expanded={isExpanded}>
       <h3 className={`${isExpanded ? 'text-lg' : 'text-base'} font-semibold text-sky-700 mb-2`}>
         {pattern.numberText}: {pattern.name}
       </h3>

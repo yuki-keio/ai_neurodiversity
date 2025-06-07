@@ -6,7 +6,8 @@ interface SuggestedQuestionsProps {
   isLoading: boolean;
   onSuggestionClick: (question: string) => void;
   onRefreshClick: () => void;
-  hasInteracted: boolean; 
+  onCloseClick: () => void;
+  hasInteracted: boolean;
 }
 
 const RefreshIcon: React.FC = () => (
@@ -15,20 +16,35 @@ const RefreshIcon: React.FC = () => (
   </svg>
 );
 
+const CloseIcon: React.FC = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-4 h-4 text-slate-500 group-hover:text-red-600 transition-colors">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
 
-const SuggestedQuestions: React.FC<SuggestedQuestionsProps> = ({ suggestions, isLoading, onSuggestionClick, onRefreshClick, hasInteracted }) => {
+
+const SuggestedQuestions: React.FC<SuggestedQuestionsProps> = ({ suggestions, isLoading, onSuggestionClick, onRefreshClick, onCloseClick, hasInteracted }) => {
   return (
     <div className="px-1 pt-2 pb-1">
       <div className="flex justify-between items-center mb-1">
         <h4 className="text-xs font-semibold text-slate-500">おすすめの質問:</h4>
-        <button
-          onClick={onRefreshClick}
-          disabled={isLoading}
-          className="p-1 rounded-full hover:bg-slate-200 disabled:opacity-50 group"
-          aria-label="候補を再読み込み"
-        >
-          {isLoading ? <div className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div> : <RefreshIcon />}
-        </button>
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={onRefreshClick}
+            disabled={isLoading}
+            className="p-1 rounded-full hover:bg-slate-200 disabled:opacity-50 group"
+            aria-label="候補を再読み込み"
+          >
+            {isLoading ? <div className="w-4 h-4 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div> : <RefreshIcon />}
+          </button>
+          <button
+            onClick={onCloseClick}
+            className="p-1 rounded-full hover:bg-slate-200 group"
+            aria-label="おすすめの質問を閉じる"
+          >
+            <CloseIcon />
+          </button>
+        </div>
       </div>
 
       <div className="overflow-y-auto"> {/* Increased max-h and min-h */}

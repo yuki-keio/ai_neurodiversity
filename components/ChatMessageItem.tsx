@@ -36,7 +36,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onPatternCli
   );
 
   const BotIcon = () => (
-    <img src="./images/niuniu.png" alt="Botのアイコン" className="w-8 h-8" />
+    <img src="./images/niuniu.png" alt="Botのアイコン" className="w-8 h-8" loading='lazy'/>
   );
 
   if (isSystem) {
