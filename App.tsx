@@ -6,6 +6,7 @@ import { ChatMessage, MessageSender, Pattern } from './types';
 import SettingsAccordion from './components/SettingsAccordion';
 import SuggestedQuestions from './components/SuggestedQuestions'; // Import new component
 import PatternModal from './components/PatternModal'; // Import PatternModal
+import NoticeModal from './components/NoticeModal'; // Import NoticeModal
 import { PREDEFINED_SYSTEM_INSTRUCTION_OPTIONS, DEFAULT_SYSTEM_INSTRUCTION } from './constants';
 import { generateQuestionSuggestions, RateLimitError } from './services/geminiService'; // Import new service and RateLimitError
 import { patterns } from './data/patterns'; // Import patterns data
@@ -29,6 +30,7 @@ const App: React.FC = () => {
   const [customInstructionText, setCustomInstructionText] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [selectedPattern, setSelectedPattern] = useState<Pattern | null>(null);
+  const [showNoticeModal, setShowNoticeModal] = useState<boolean>(false);
 
   // PWAインストール関連の状態
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -303,6 +305,15 @@ const App: React.FC = () => {
     setSelectedPattern(null);
   };
 
+  const handleNoticeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowNoticeModal(true);
+  };
+
+  const handleCloseNoticeModal = () => {
+    setShowNoticeModal(false);
+  };
+
 
   const SendIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -311,7 +322,7 @@ const App: React.FC = () => {
   );
 
   const SettingsIcon = () => (
-    <img src="./images/setting.png" alt="Settings" className="w-6 h-6" loading='lazy'/>
+    <img src="./images/setting.png" alt="Settings" className="w-6 h-6" loading='lazy' />
   );
 
   return (
@@ -360,7 +371,7 @@ const App: React.FC = () => {
         ))}
       </div>
 
-      <footer className="bg-white p-4 border-t border-slate-200">
+      <footer className="bg-white px-5 pt-3 pb-2 border-t border-slate-200">
         {showSuggestedQuestions && (
           <SuggestedQuestions
             suggestions={suggestedQuestions}
@@ -400,8 +411,8 @@ const App: React.FC = () => {
             )}
           </button>
         </form>
-        <p className="text-xs text-slate-500 mt-2 text-center">
-          AIによるアドバイスは参考情報です。専門的な助言が必要な場合は医師やカウンセラーにご相談ください。
+        <p className="text-xs text-slate-500 mt-4 text-center">
+          制作： <a href="https://dioden.org" target="_blank" className="text-slate-400 hover:underline">一般社団法人ニューロダイバーシティ協会</a> × <a href="https://yuki-lab.com" target="_blank" className="text-slate-400 hover:underline">yuki Lab</a> | <a href="#" onClick={handleNoticeClick} className="text-slate-400 hover:underline">注記</a>
         </p>
       </footer>
 
@@ -410,6 +421,11 @@ const App: React.FC = () => {
         isOpen={selectedPattern !== null}
         onClose={handleClosePatternModal}
         onPatternClick={handlePatternClick}
+      />
+
+      <NoticeModal
+        isOpen={showNoticeModal}
+        onClose={handleCloseNoticeModal}
       />
     </div>
   );

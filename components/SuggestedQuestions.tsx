@@ -25,7 +25,7 @@ const CloseIcon: React.FC = () => (
 
 const SuggestedQuestions: React.FC<SuggestedQuestionsProps> = ({ suggestions, isLoading, onSuggestionClick, onRefreshClick, onCloseClick, hasInteracted }) => {
   return (
-    <div className="px-1 pt-2 pb-1">
+    <div className="pt-2 pb-1">
       <div className="flex justify-between items-center mb-1">
         <h4 className="text-xs font-semibold text-slate-500">おすすめの質問:</h4>
         <div className="flex items-center space-x-1">
