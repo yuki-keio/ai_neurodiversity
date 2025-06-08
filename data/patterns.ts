@@ -6,13 +6,14 @@ function generateMainText(pattern: Omit<Pattern, 'mainText'>): string {
   const parts: string[] = [];
 
   // カテゴリとグループ
-  parts.push(`${pattern.category} > ${pattern.group}`);
-  parts.push(`${pattern.numberText}`);
-  parts.push(`${pattern.name}`);
+  parts.push(`カテゴリ：${pattern.category}`);
+  parts.push(`グループ：${pattern.group}`);
+  parts.push(`番号：${pattern.numberText}`);
+  parts.push(`パターン名：${pattern.name}`);
 
   // 導入（パターン名の補足も兼ねて）
   if (pattern.id === 1) {
-    parts.push(pattern.introduction);
+    parts.push(`Introduction：${pattern.introduction}`);
   }
 
   parts.push(""); // 空行
@@ -20,33 +21,33 @@ function generateMainText(pattern: Omit<Pattern, 'mainText'>): string {
 
   // 体験談
   if (pattern.exampleQuote) {
-    parts.push(`${pattern.exampleQuote.person}：  ${pattern.exampleQuote.quote}`);
+    parts.push(`体験談：${pattern.exampleQuote.person}：  ${pattern.exampleQuote.quote}`);
     parts.push("");
   }
 
 
-  parts.push(pattern.context);
+  parts.push(`Context：${pattern.context}`);
   parts.push("");
 
   // 問題
   parts.push("▼その状況において");
   parts.push("");
-  parts.push(pattern.problem);
-  parts.push(pattern.forces);
+  parts.push(`Problem：${pattern.problem}`);
+  parts.push(`Forces：${pattern.forces}`);
   parts.push("");
 
   // 解決策
   parts.push("▼そこで");
   parts.push("");
-  parts.push(pattern.solution);
-  parts.push(pattern.actions);
+  parts.push(`Solution：${pattern.solution}`);
+  parts.push(`Actions：${pattern.actions}`);
   parts.push("");
 
 
   // 結果
   parts.push("▼その結果");
   parts.push("");
-  parts.push(pattern.consequences);
+  parts.push(`Consequence：${pattern.consequences}`);
   parts.push("");
 
 
@@ -573,5 +574,5 @@ export const patterns: Pattern[] = basePatterns.map(basePattern => ({
 }));
 
 export const ALL_PATTERNS_TEXT_FOR_EXTRACTION = patterns.map(p => {
-  return `Pattern ${p.numberText}: ${p.name}\n${p.mainText}\n---`;
+  return `${p.numberText}番:\n${p.mainText}\n---`;
 }).join('\n');

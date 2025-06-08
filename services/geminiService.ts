@@ -1,6 +1,6 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Pattern, ChatMessage, MessageSender } from '../types'; // Added ChatMessage, MessageSender
-import { patterns as ALL_PATTERNS_TEXT_FOR_EXTRACTION } from '../data/patterns';
+import { ALL_PATTERNS_TEXT_FOR_EXTRACTION } from '../data/patterns';
 import { DEFAULT_SYSTEM_INSTRUCTION } from "../constants";
 
 
@@ -62,22 +62,23 @@ export const getRelevantPatternNumbers = async (userQuery: string): Promise<numb
   try {
     const prompt = `
 あなたはニューロダイバージェントをサポートするAIの一部です。
-以下の「パターン一覧」と「ユーザーの質問」を読み、ユーザーの質問に答える上で参考になるパターン（経験則）の番号を抽出してください。
-結果は、関連するパターンの番号を、関連性が最も高いものから順にカンマ区切りで返してください (例: "11, 6, 25")。
-抽出するパターンはユーザーの質問と関連性が高いものを3個ほどが望ましいですが、関連するパターンが全くない場合は "NONE" と返してください。
+以下の「パターン一覧」すべてと、「質問」を読み、ユーザーからの質問に答える上で参考になるパターン（経験則）の番号を抽出してください。
+結果は、質問と関係のあるパターンの番号を、関連性が最も高いものから順にカンマ区切りで3個ほど返してください (例: "11, 6, 25")。
+関連するパターンが全くない場合は "NONE" と返してください。
 
 パターン一覧:
 ${ALL_PATTERNS_TEXT_FOR_EXTRACTION}
 
-ユーザーの質問: "${userQuery}"
+質問: "${userQuery}"
 
-ユーザーの質問と関連性の高いパターンの番号:
+質問に答える上で参考にできるパターンの番号:
 `;
 
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
     });
+    console.log(`userQuery: "${userQuery}", prompt: "${prompt}", response:`, response.text);
 
     const textResponse = response.text?.trim() || "";
     if (textResponse.toUpperCase() === "NONE" || textResponse === "") {
