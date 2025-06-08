@@ -61,7 +61,7 @@ const SuggestedQuestions: React.FC<SuggestedQuestionsProps> = ({ suggestions, is
                 className="text-xs text-left bg-sky-50 text-sky-700 px-2.5 py-1.5 rounded-lg hover:bg-sky-100 border border-sky-200 transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-1 shadow-sm hover:shadow-md"
                 title={q}
               >
-                {q.length > 35 ? q.substring(0, 32) + "..." : q}
+                {q.length > 100 ? q.substring(0, 97) + "..." : q}
               </button>
             ))}
           </div>

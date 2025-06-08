@@ -66,19 +66,22 @@ export const getRelevantPatternNumbers = async (userQuery: string): Promise<numb
 結果は、質問と関係のあるパターンの番号を、関連性が最も高いものから順にカンマ区切りで3個ほど返してください (例: "11, 6, 25")。
 関連するパターンが全くない場合は "NONE" と返してください。
 
-パターン一覧:
+## パターン一覧:
+
 ${ALL_PATTERNS_TEXT_FOR_EXTRACTION}
 
-質問: "${userQuery}"
+## 質問:
 
-質問に答える上で参考にできるパターンの番号:
+"${userQuery}"
+
+## 質問に答える上で参考にできるパターンの番号:
+
 `;
 
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: MODEL_NAME,
       contents: prompt,
     });
-    console.log(`userQuery: "${userQuery}", prompt: "${prompt}", response:`, response.text);
 
     const textResponse = response.text?.trim() || "";
     if (textResponse.toUpperCase() === "NONE" || textResponse === "") {
@@ -118,7 +121,7 @@ export async function* generateAdvice(userQuery: string, relevantPatterns: Patte
       // パターンが見つかった場合の通常プロンプト
       const patternContext = relevantPatterns.map(p =>
         `${p.mainText}`
-      ).join('\n\n');
+      ).join('\n\n---\n\n');
 
       prompt = `
 あなたはニューロダイバージェントのためにコーチングを行うプロフェッショナルです。
@@ -127,7 +130,8 @@ export async function* generateAdvice(userQuery: string, relevantPatterns: Patte
 特に指定がない限り回答は600字以内で非常に簡潔に、具体的でユーザーの生活に役立つ実践可能なものにしてください。
 ユーザーの質問: "${userQuery}"
 
-関連パターン情報:
+## 関連パターン情報:
+
 ${patternContext}
 `;
     }
@@ -141,7 +145,6 @@ ${patternContext}
         systemInstruction: effectiveSystemInstruction,
       }
     });
-
     let hasYielded = false;
     for await (const chunk of responseStream) {
       if (chunk.text) {
@@ -190,7 +193,7 @@ export const generateQuestionSuggestions = async (
 
 ## 参考情報
 
-### ユーザーが設定したシステムインストラクション：
+### コーチングAIへのシステムインストラクション：
 ${systemInstruction}
 
 ### 直近の会話履歴:

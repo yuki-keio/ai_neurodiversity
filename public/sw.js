@@ -1,4 +1,4 @@
-const CACHE_NAME = 'neurodiversity-support-ai-v3';
+const CACHE_NAME = 'neurodiversity-support-ai-v5';
 // 事前キャッシュは同一オリジンのリソースのみに限定
 const urlsToCache = [
     '/images/niuniu.png',
@@ -33,7 +33,7 @@ const urlsToCache = [
 ];
 
 // 外部リソース用の別キャッシュ名
-const EXTERNAL_CACHE_NAME = 'external-resources-v2';
+const EXTERNAL_CACHE_NAME = 'external-resources-v5';
 
 // インストール時にキャッシュを作成
 self.addEventListener('install', (event) => {

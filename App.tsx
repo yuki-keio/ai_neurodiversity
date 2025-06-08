@@ -55,6 +55,10 @@ const App: React.FC = () => {
       console.log("Suggestion fetch skipped; showSuggestedQuestions is false.");
       return;
     }
+    if (chatIsLoading) {
+      console.log("Suggestion fetch skipped; chat is currently loading.");
+      return;
+    }
 
     // Guard for non-empty input fetches using a ref to prevent re-entrancy
     // and to avoid making fetchSuggestions dependent on isGeneratingSuggestions state.
@@ -262,8 +266,8 @@ const App: React.FC = () => {
       // hasInteracted would have been set by onChange if it wasn't already
       sendMessage(inputValue);
       setInputValue('');
-      setSuggestedQuestions([]);
       setShowSuggestedQuestions(false);
+      initialSuggestionsFetchedRef.current = false;
     }
   };
 
@@ -411,8 +415,8 @@ const App: React.FC = () => {
             )}
           </button>
         </form>
-        <p className="text-xs text-slate-500 mt-4 text-center">
-          制作： <a href="https://dioden.org" target="_blank" className="text-slate-400 hover:underline">一般社団法人ニューロダイバーシティ協会</a> × <a href="https://yuki-lab.com" target="_blank" className="text-slate-400 hover:underline">yuki Lab</a> | <a href="#" onClick={handleNoticeClick} className="text-slate-400 hover:underline">注記</a>
+        <p className="text-[10px] text-slate-500 mt-4 text-center">
+          制作：<a href="https://dioden.org" target="_blank" className="text-slate-400 hover:underline">一般社団法人ニューロダイバーシティ協会</a> × <a href="https://yuki-lab.com" target="_blank" className="text-slate-400 hover:underline">yuki Lab</a> | <a href="#" onClick={handleNoticeClick} className="text-slate-400 hover:underline">注記</a>
         </p>
       </footer>
 

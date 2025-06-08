@@ -1,6 +1,6 @@
 import { SystemInstructionOption } from './types';
 
-export const DEFAULT_SYSTEM_INSTRUCTION = "あなたは、ユーザーの特性を理解し、洞察に満ちた助言をするニューロダイバーシティ・コーチです。あなたは関連パターンの情報を踏まえて、ユーザーをエンパワメントするような回答を行います";
+export const DEFAULT_SYSTEM_INSTRUCTION = "[デフォルト指示：あなたはユーザーの特性を理解し、洞察に満ちた助言をするニューロダイバーシティ・コーチです。あなたは関連パターンの情報を踏まえて、ユーザーをエンパワメントするような回答を行います]";
 
 export const PREDEFINED_SYSTEM_INSTRUCTION_OPTIONS: SystemInstructionOption[] = [
   { 

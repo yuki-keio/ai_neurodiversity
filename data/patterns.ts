@@ -74,7 +74,7 @@ const basePatterns = [
     category: "自分が輝ける生き方",
     group: "自分の人生を踏み出す",
     imageUrl: "/images/pattern1.png",
-    introduction: "",
+    introduction: "「私の感じてきた違和感は、まさにこれだ」と思える言葉を見つける。",
     exampleQuote: {
       person: "Aさん（自閉スペクトラム）",
       quote: "診断を受けて、「そういうことだったのか」と納得しました。",
@@ -574,5 +574,5 @@ export const patterns: Pattern[] = basePatterns.map(basePattern => ({
 }));
 
 export const ALL_PATTERNS_TEXT_FOR_EXTRACTION = patterns.map(p => {
-  return `${p.numberText}番:\n${p.mainText}\n---`;
+  return `${p.numberText}番:\n${p.mainText}\n\n---\n`;
 }).join('\n');

@@ -44,7 +44,7 @@ const SettingsAccordion: React.FC<SettingsAccordionProps> = ({
     }
 
     if (customText.trim() !== "") {
-      combinedInstruction += "\n\nさらに、ユーザーからの具体的な指示は次の通りです：\n" + customText.trim();
+      combinedInstruction += "\n\nユーザーからの追加情報や指示は次の通り：\n" + customText.trim();
     }
     onSave(combinedInstruction, selectedOptions, customText);
   };
