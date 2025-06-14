@@ -16,8 +16,9 @@ export const useChat = (getSystemInstruction: () => string) => {
     {
       id: 'initial-greeting',
       sender: MessageSender.BOT,
-      text: 'こんにちは！発達特性に関するお悩みや、知りたいことについて話しかけてみてください。当事者の**1300個**の経験則を**2000時間**かけて研究したデータを踏まえてアドバイスを作成します。',
+      text: '発達特性に関するお悩みや、知りたいことについて話しかけてみてください！当事者の**1300個**の経験則を**2000時間**かけて研究したデータを踏まえてアドバイスを作成します',
       timestamp: new Date(),
+      imageUrl: '/images/nd_ai_intro.png',
     }
   ]);
   const [isLoading, setIsLoading] = useState(false); // For global input disable

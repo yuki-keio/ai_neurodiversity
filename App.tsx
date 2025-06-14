@@ -209,9 +209,12 @@ const App: React.FC = () => {
       suggestionDebounceTimeoutRef.current = null;
     }
 
-    // AIからの応答中、設定画面が開いているとき、または入力が空のときは処理しない
     if (!showSuggestedQuestions) {
       console.log("Suggestion fetch skipped; showSuggestedQuestions is false.");
+      return;
+    }
+    if (inputValue.trim() === "") {
+      console.log("Suggestion fetch skipped; input is empty.");
       return;
     }
 

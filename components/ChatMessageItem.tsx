@@ -36,7 +36,7 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onPatternCli
   );
 
   const BotIcon = () => (
-    <img src="./images/niuniu.png" alt="Botのアイコン" className="w-8 h-8" loading='lazy'/>
+    <img src="./images/niuniu.png" alt="Botのアイコン" className="w-8 h-8" loading='lazy' />
   );
 
   if (isSystem) {
@@ -79,6 +79,16 @@ const ChatMessageItem: React.FC<ChatMessageItemProps> = ({ message, onPatternCli
             <div className="prose" dangerouslySetInnerHTML={renderMarkdown(message.text)} />
           ) : (
             <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+          )}
+          {isBot && message.imageUrl && (
+            <div className="mb-3">
+              <img
+                src={message.imageUrl}
+                alt="パターン画像"
+                className="w-full max-w-sm rounded-lg"
+                loading="lazy"
+              />
+            </div>
           )}
 
           {isBot && message.isLoading && (

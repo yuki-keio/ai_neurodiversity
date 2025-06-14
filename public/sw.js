@@ -3,6 +3,7 @@ const CACHE_NAME = 'neurodiversity-support-ai-v5';
 const urlsToCache = [
     '/images/niuniu.png',
     '/images/setting.png',
+    '/images/nd_ai_intro.png',
     '/images/pattern1.png',
     '/images/pattern2.png',
     '/images/pattern3.png',

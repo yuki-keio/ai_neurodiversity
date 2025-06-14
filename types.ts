@@ -38,6 +38,7 @@ export interface ChatMessage {
   timestamp: Date;
   relevantPatterns?: Pattern[];
   isLoading?: boolean;
+  imageUrl?: string;
 }
 
 export interface ProcessEnv {

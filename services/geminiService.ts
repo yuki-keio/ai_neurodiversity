@@ -96,6 +96,8 @@ ${ALL_PATTERNS_TEXT_FOR_EXTRACTION}
 };
 
 export async function* generateAdvice(userQuery: string, relevantPatterns: Pattern[], systemInstruction?: string): AsyncGenerator<string, void, undefined> {
+  const effectiveSystemInstruction = systemInstruction || DEFAULT_SYSTEM_INSTRUCTION;
+
   if (!API_KEY) {
     console.error("Gemini API key is not configured. Cannot generate advice stream.");
     yield MESSAGE_TEXT_ERROR_API_KEY_NOT_CONFIGURED;
@@ -124,19 +126,17 @@ export async function* generateAdvice(userQuery: string, relevantPatterns: Patte
       ).join('\n\n---\n\n');
 
       prompt = `
+## 関連パターン情報:
+
+${patternContext}
+
 あなたはニューロダイバージェントのためにコーチングを行うプロフェッショナルです。
 下記のユーザーの質問と関連パターン情報を踏まえて、指示に従いアドバイスを作成してください。ただし、関連パターン情報自体はあなたの回答と別に表示されるので、単なる繰り返しは避けて。
 
 特に指定がない限り回答は600字以内で非常に簡潔に、具体的でユーザーの生活に役立つ実践可能なものにしてください。
 ユーザーの質問: "${userQuery}"
-
-## 関連パターン情報:
-
-${patternContext}
 `;
     }
-
-    const effectiveSystemInstruction = systemInstruction || DEFAULT_SYSTEM_INSTRUCTION;
 
     const responseStream = await ai.models.generateContentStream({
       model: MODEL_NAME,
@@ -188,7 +188,7 @@ export const generateQuestionSuggestions = async (
 
 以下の参考情報を踏まえて、ユーザーがコーチングAIに対して次に尋ねそうな、または尋ねると良い質問の候補を2個ほど提案してください。
 質問内容は簡潔・具体的で、コーチングAIが他のニューロダイバージェントの当事者の経験則パターンを引用して回答できる形が望ましいです。
-出力は、提案する質問の文字列だけを含むJSON配列の形式でお願いします。例: ["自分に合った環境を見つけるには？", "人間関係を改善するコツは？"]
+出力は、提案する質問の文字列をJSON配列の形式でお願いします。例: ["自分に合った環境を見つけるには？", "人間関係を改善するコツは？"]
 もし適切な質問候補が思いつかない場合は、空の配列 [] を返してください。
 
 ## 参考情報
@@ -213,6 +213,12 @@ ${currentUserInput || "入力なし"}
       contents: prompt,
       config: {
         responseMimeType: "application/json",
+        responseSchema: {
+          type: "array",
+          items: {
+            type: "string",
+          }
+        },
         // thinkingConfig: { thinkingBudget: 0 } // Potentially use for lower latency if needed
       }
     });
